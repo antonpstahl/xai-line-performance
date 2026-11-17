@@ -1,25 +1,25 @@
 {
   "data": {
-    "sample": true,
-    "parts": 124565,
+    "sample": false,
+    "parts": 1183747,
     "failures": 6879,
-    "features": 1075,
-    "dev_parts": 99652,
-    "holdout_parts": 24913,
-    "holdout_failures": 983
+    "features": 1073,
+    "dev_parts": 946998,
+    "holdout_parts": 236749,
+    "holdout_failures": 964
   },
-  "threshold": 0.33019252730896664,
+  "threshold": 0.18214152953257476,
   "oof": {
-    "flagged": 1935,
-    "mcc": 0.4052,
-    "pr_auc": 0.3467,
-    "roc_auc": 0.7259
+    "flagged": 2715,
+    "mcc": 0.2457,
+    "pr_auc": 0.144,
+    "roc_auc": 0.724
   },
   "holdout": {
-    "flagged": 206,
-    "mcc": 0.2183,
-    "pr_auc": 0.1123,
-    "roc_auc": 0.5669
+    "flagged": 289,
+    "mcc": 0.0358,
+    "pr_auc": 0.013,
+    "roc_auc": 0.5646
   },
   "config": {
     "params": {
@@ -41,13 +41,13 @@
     "max_rounds": 2000,
     "early_stopping": 100,
     "fold_rounds": [
-      483,
-      1087,
-      491,
-      492,
-      978
+      603,
+      657,
+      1184,
+      1169,
+      367
     ],
-    "final_rounds": 706
+    "final_rounds": 796
   },
   "versions": {
     "python": "3.12.13",
