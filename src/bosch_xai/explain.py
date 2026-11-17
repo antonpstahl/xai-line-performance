@@ -97,7 +97,16 @@ def local_cases(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, int
     return {name: int(np.flatnonzero(m)[np.argmax(p[m])]) for name, m in masks.items() if m.any()}
 
 
-def render_local(cases, ids, X, y, p, shap, base, features) -> str:
+def render_local(
+    cases: dict[str, int],
+    ids: np.ndarray,
+    X: np.ndarray,
+    y: np.ndarray,
+    p: np.ndarray,
+    shap: np.ndarray,
+    base: np.ndarray,
+    features: list[str],
+) -> str:
     lines = ["# Local explanations (holdout)", "", "SHAP in log-odds; positive = more risk.", ""]
     for name, i in cases.items():
         lines += [

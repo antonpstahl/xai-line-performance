@@ -72,6 +72,7 @@ def best_threshold(y: np.ndarray, p: np.ndarray) -> tuple[float, float]:
 
 def scores(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, float]:
     return {
+        "flagged": int((p >= threshold).sum()),
         "mcc": round(matthews_corrcoef(y, p >= threshold), 4),
         "pr_auc": round(average_precision_score(y, p), 4),
         "roc_auc": round(roc_auc_score(y, p), 4),
@@ -121,7 +122,7 @@ def train() -> dict:
         },
         "threshold": threshold,
         "oof": scores(y, oof, threshold),
-        "holdout": scores(y_hold, p_hold, threshold) | {"flagged": int(sum(p_hold >= threshold))},
+        "holdout": scores(y_hold, p_hold, threshold),
         "config": {
             "params": PARAMS,
             "n_folds": N_FOLDS,
