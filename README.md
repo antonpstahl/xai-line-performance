@@ -99,13 +99,16 @@ data needs more boosting rounds, so it will take longer.
 
 ## Design decisions
 
-- **Numeric and date files only.** The categorical file is very sparse: its more than 2,000
-  columns are empty for almost every part. Parsing it costs much memory and time for little
+- **Numeric and date files only.** The categorical file is very sparse: 97% of the cells in its
+  2,140 columns are empty (measured on the first 200,000 parts). Parsing it costs much memory and time for little
   expected signal, so it is downloaded (as specified) but not used. It would be a separate
   experiment.
-- **One timestamp per station.** The date columns of a station hold the same value, so they are
-  collapsed with a row-wise minimum. The minimum ignores missing entries and stays well defined
-  even if a station's values ever differ slightly. From the station times
+- **One timestamp per station.** Checked on the first 200,000 parts: in 50 of the 52 stations all
+  date columns of a visit hold the same value, so the row-wise minimum loses nothing (it also
+  ignores missing entries). The exceptions are L1_S24 (median spread 0.03 time units, small
+  against a median part duration of 3.7) and L1_S25 (median 0.12, but 8.6 at the 90th
+  percentile); there the minimum keeps the entry time and drops the time spent inside the
+  station. From the station times
   come the part's start, end and duration and one visited flag per station: the route through the
   line is information in itself.
 - **No "magic" features.** Features built from neighbouring Ids (row order) were strong in the
@@ -161,6 +164,8 @@ data needs more boosting rounds, so it will take longer.
 - k = 5 slices is a fixed, readable choice, not a tuned one; slices are descriptive.
 - Early stopping uses each validation fold, which makes OOF scores slightly optimistic; the
   time holdout is not affected.
+- Station L1_S25 is reduced to its entry time although parts spend measurable time inside it
+  (see Design decisions); a per-station duration would keep that information.
 - The faithfulness check is lexical. It catches invented names and numbers, but not a wrong
   relation between correct ones, numbers written as words, or vague claims.
 - Results on `--sample` overstate precision because failures are about ten times more frequent
