@@ -1,0 +1,59 @@
+{
+  "data": {
+    "sample": true,
+    "parts": 124565,
+    "failures": 6879,
+    "features": 1075,
+    "dev_parts": 99652,
+    "holdout_parts": 24913,
+    "holdout_failures": 983
+  },
+  "threshold": 0.33019252730896664,
+  "oof": {
+    "flagged": 1935,
+    "mcc": 0.4052,
+    "pr_auc": 0.3467,
+    "roc_auc": 0.7259
+  },
+  "holdout": {
+    "flagged": 206,
+    "mcc": 0.2183,
+    "pr_auc": 0.1123,
+    "roc_auc": 0.5669
+  },
+  "config": {
+    "params": {
+      "objective": "binary",
+      "metric": "average_precision",
+      "learning_rate": 0.05,
+      "num_leaves": 31,
+      "min_data_in_leaf": 100,
+      "feature_fraction": 0.5,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 1,
+      "seed": 42,
+      "deterministic": true,
+      "force_row_wise": true,
+      "verbose": -1
+    },
+    "n_folds": 5,
+    "holdout_fraction": 0.2,
+    "max_rounds": 2000,
+    "early_stopping": 100,
+    "fold_rounds": [
+      483,
+      1087,
+      491,
+      492,
+      978
+    ],
+    "final_rounds": 706
+  },
+  "versions": {
+    "python": "3.12.13",
+    "lightgbm": "4.7.0",
+    "polars": "2.1.0",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.5"
+  }
+}
