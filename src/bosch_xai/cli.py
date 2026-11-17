@@ -2,7 +2,7 @@
 
 import argparse
 
-from bosch_xai import data
+from bosch_xai import data, model
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -13,9 +13,12 @@ def main(argv: list[str] | None = None) -> None:
     prepare.add_argument(
         "--sample", action="store_true", help="all failures + 10%% of other parts (seed 42)"
     )
+    commands.add_parser("train", help="cross-validate, tune the threshold, score the holdout")
     args = parser.parse_args(argv)
 
     if args.command == "download":
         data.download()
     elif args.command == "prepare":
         data.prepare(sample=args.sample)
+    elif args.command == "train":
+        model.train()
