@@ -2,7 +2,7 @@ import numpy as np
 import polars as pl
 from sklearn.metrics import matthews_corrcoef
 
-from bosch_xai.model import best_threshold, time_split
+from bosch_xai.model import best_threshold, feature_names, time_split
 
 
 def test_best_threshold_matches_brute_force():
@@ -27,3 +27,8 @@ def test_time_split_holds_out_latest_parts():
     dev, holdout = time_split(df)
     assert holdout["start_time"].to_list() == [8, 9]
     assert dev["start_time"].null_count() == 1 and len(dev) == 8
+
+
+def test_start_time_is_sort_key_not_feature():
+    df = pl.DataFrame({"Id": [1], "Response": [0], "start_time": [1.0], "duration": [2.0]})
+    assert feature_names(df) == ["duration"]

@@ -64,29 +64,31 @@ def download() -> None:
 
 
 def station_of(feature: str) -> str:
-    """Station of a column like L3_S32_F3850 or L3_S32_time; 'part-level' for the rest."""
+    """Station of a column like L3_S32_F3850 or L3_S32_elapsed; 'part-level' for the rest."""
     match = STATION.match(feature)
     return match.group(1) if match else "part-level"
 
 
 def date_features(date_columns: list[str]) -> tuple[list[pl.Expr], list[pl.Expr]]:
-    """Expressions for one timestamp per station, then part start/end/duration and visit flags.
+    """Expressions for one timestamp per station, then the features derived from them.
 
-    All date columns of a station hold the same value, so the minimum collapses them losslessly
-    while ignoring missing entries.
+    The row-wise minimum collapses a station's date columns (equal in 50 of 52 stations) and
+    ignores missing entries. Features use times relative to the part's first station, not
+    absolute timestamps: those only say when a part was made, which does not carry over to
+    later production. `start_time` is kept as the sort key for the time split, not as a feature.
     """
     by_station: dict[str, list[str]] = {}
     for col in date_columns:
         if col != "Id":
             by_station.setdefault(station_of(col), []).append(col)
     station_times = [pl.min_horizontal(cols).alias(f"{s}_time") for s, cols in by_station.items()]
-    times = [f"{s}_time" for s in by_station]
-    visited = [
-        pl.col(f"{s}_time").is_not_null().cast(pl.Int8).alias(f"{s}_visited") for s in by_station
-    ]
+    times = [pl.col(f"{s}_time") for s in by_station]
     start, end = pl.min_horizontal(times), pl.max_horizontal(times)
-    derived = [start.alias("start_time"), end.alias("end_time"), (end - start).alias("duration")]
-    return station_times, derived + visited
+    derived = [start.alias("start_time"), (end - start).alias("duration")]
+    for s, t in zip(by_station, times, strict=True):
+        visited = t.is_not_null().cast(pl.Int8)
+        derived += [(t - start).alias(f"{s}_elapsed"), visited.alias(f"{s}_visited")]
+    return station_times, derived
 
 
 def scan(path: Path) -> pl.LazyFrame:
@@ -114,7 +116,7 @@ def prepare(sample: bool, raw: Path = RAW, out: Path = FEATURES) -> Path:
     date_part = dates.join(keep, on="Id", how="semi").select("Id", *station_times)
     features = (
         numeric.join(keep, on="Id", how="semi")
-        .join(date_part.with_columns(derived), on="Id")
+        .join(date_part.select("Id", *derived), on="Id")
         .sort("Id")
     )
     out.parent.mkdir(parents=True, exist_ok=True)

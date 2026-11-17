@@ -45,7 +45,8 @@ def time_split(df: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
 
 
 def feature_names(df: pl.DataFrame) -> list[str]:
-    return [c for c in df.columns if c not in ("Id", "Response")]
+    """All columns except the key, the target and the time-split sort key."""
+    return [c for c in df.columns if c not in ("Id", "Response", "start_time")]
 
 
 def matrix(df: pl.DataFrame, features: list[str]) -> np.ndarray:

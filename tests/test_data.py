@@ -70,11 +70,12 @@ def test_prepare_collapses_stations(tmp_path):
     df = pl.read_parquet(out)
 
     assert df["Id"].to_list() == [1, 2, 3]
-    assert df["L0_S0_time"].to_list() == [10.0, None, 1.0]
-    assert df["L0_S1_time"].to_list() == [None, 20.5, 4.0]
+    assert df["L0_S0_elapsed"].to_list() == [0.0, None, 0.0]
+    assert df["L0_S1_elapsed"].to_list() == [None, 0.0, 3.0]
     assert df["L0_S0_visited"].to_list() == [1, 0, 1]
     assert df["start_time"].to_list() == [10.0, 20.5, 1.0]
     assert df["duration"].to_list() == [0.0, 0.0, 3.0]
+    assert not any(c.endswith(("_time", "end_time")) for c in df.columns if c != "start_time")
     assert pl.read_parquet_metadata(out)["sample"] == "false"
 
 
@@ -92,5 +93,5 @@ def test_prepare_sample_keeps_all_failures(tmp_path):
 
 def test_station_of():
     assert data.station_of("L3_S32_F3850") == "L3_S32"
-    assert data.station_of("L0_S5_visited") == "L0_S5"
+    assert data.station_of("L0_S5_elapsed") == "L0_S5"
     assert data.station_of("duration") == "part-level"
