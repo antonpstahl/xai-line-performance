@@ -12,7 +12,7 @@ import polars as pl
 from sklearn.cluster import KMeans
 
 from bosch_xai.data import FEATURES, REPORTS, SEED, station_of
-from bosch_xai.model import METRICS, MODEL, time_split
+from bosch_xai.model import METRICS, MODEL, matrix, time_split
 
 N_SLICES = 5
 HIGH_RISK_SHARE = 0.02  # high risk = flagged by the threshold or in the top 2% of scores
@@ -152,7 +152,7 @@ def explain(use_llm: bool = False) -> None:
     booster = lgb.Booster(model_file=MODEL)
     features = booster.feature_name()
     _, holdout = time_split(pl.read_parquet(FEATURES))
-    X, y = holdout.select(features).to_numpy(), holdout["Response"].to_numpy()
+    X, y = matrix(holdout, features), holdout["Response"].to_numpy()
     p = booster.predict(X)
     contrib = booster.predict(X, pred_contrib=True)  # TreeSHAP; last column is the base value
     shap, base = contrib[:, :-1], contrib[:, -1]

@@ -48,6 +48,11 @@ def feature_names(df: pl.DataFrame) -> list[str]:
     return [c for c in df.columns if c not in ("Id", "Response")]
 
 
+def matrix(df: pl.DataFrame, features: list[str]) -> np.ndarray:
+    """Feature matrix as float32; mixed column types would otherwise upcast to float64."""
+    return df.select(pl.col(features).cast(pl.Float32)).to_numpy()
+
+
 def best_threshold(y: np.ndarray, p: np.ndarray) -> tuple[float, float]:
     """Return (threshold, MCC) maximising MCC for the rule `p >= threshold`.
 
@@ -75,11 +80,10 @@ def scores(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, float]:
 
 def train() -> dict:
     """Run CV, pick the threshold on out-of-fold predictions, refit, score the holdout."""
-    df = pl.read_parquet(FEATURES)
     sample = pl.read_parquet_metadata(FEATURES).get("sample") == "true"
-    dev, holdout = time_split(df)
-    features = feature_names(df)
-    X, y = dev.select(features).to_numpy(), dev["Response"].to_numpy()
+    dev, holdout = time_split(pl.read_parquet(FEATURES))  # no unsorted copy kept in memory
+    features = feature_names(dev)
+    X, y = matrix(dev, features), dev["Response"].to_numpy()
     full = lgb.Dataset(X, y, feature_name=features, free_raw_data=False)
 
     oof, rounds = np.zeros(len(y)), []
@@ -103,13 +107,13 @@ def train() -> dict:
     MODELS.mkdir(parents=True, exist_ok=True)
     final.save_model(MODEL)
     y_hold = holdout["Response"].to_numpy()
-    p_hold = final.predict(holdout.select(features).to_numpy())
+    p_hold = final.predict(matrix(holdout, features))
 
     metrics = {
         "data": {
             "sample": sample,
-            "parts": len(df),
-            "failures": int(df["Response"].sum()),
+            "parts": len(dev) + len(holdout),
+            "failures": int(y.sum() + y_hold.sum()),
             "features": len(features),
             "dev_parts": len(dev),
             "holdout_parts": len(holdout),
