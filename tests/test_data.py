@@ -1,6 +1,7 @@
 import zipfile
 
 import kagglehub
+import polars as pl
 import pytest
 
 from bosch_xai import data
@@ -55,3 +56,41 @@ def test_download_explains_missing_credentials(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as exc:
         data.download()
     assert data.RULES_URL in str(exc.value) and "KAGGLE_API_TOKEN" in str(exc.value)
+
+
+def test_prepare_collapses_stations(tmp_path):
+    nan = ""
+    (tmp_path / "train_numeric.csv").write_text(
+        "Id,L0_S0_F0,L0_S1_F2,Response\n1,0.5,,0\n2,,1.5,1\n3,0.1,0.2,0\n"
+    )
+    (tmp_path / "train_date.csv").write_text(
+        f"Id,L0_S0_D1,L0_S0_D3,L0_S1_D5\n1,10.0,10.0,{nan}\n2,{nan},{nan},20.5\n3,1.0,1.0,4.0\n"
+    )
+    out = data.prepare(sample=False, raw=tmp_path, out=tmp_path / "f.parquet")
+    df = pl.read_parquet(out)
+
+    assert df["Id"].to_list() == [1, 2, 3]
+    assert df["L0_S0_time"].to_list() == [10.0, None, 1.0]
+    assert df["L0_S1_time"].to_list() == [None, 20.5, 4.0]
+    assert df["L0_S0_visited"].to_list() == [1, 0, 1]
+    assert df["start_time"].to_list() == [10.0, 20.5, 1.0]
+    assert df["duration"].to_list() == [0.0, 0.0, 3.0]
+    assert pl.read_parquet_metadata(out)["sample"] == "false"
+
+
+def test_prepare_sample_keeps_all_failures(tmp_path):
+    rows = "\n".join(f"{i},{i},{int(i % 50 == 0)}" for i in range(1, 1001))
+    (tmp_path / "train_numeric.csv").write_text(f"Id,L0_S0_F0,Response\n{rows}\n")
+    dates = "\n".join(f"{i},{i}" for i in range(1, 1001))
+    (tmp_path / "train_date.csv").write_text(f"Id,L0_S0_D1\n{dates}\n")
+
+    df = pl.read_parquet(data.prepare(sample=True, raw=tmp_path, out=tmp_path / "f.parquet"))
+
+    assert df["Response"].sum() == 20
+    assert len(df) == 20 + 98  # exactly 10% of the 980 non-failures
+
+
+def test_station_of():
+    assert data.station_of("L3_S32_F3850") == "L3_S32"
+    assert data.station_of("L0_S5_visited") == "L0_S5"
+    assert data.station_of("duration") == "part-level"
