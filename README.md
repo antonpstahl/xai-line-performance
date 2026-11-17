@@ -23,7 +23,9 @@ threshold, so the threshold is tuned and reported along with threshold-free metr
   <https://www.kaggle.com/competitions/bosch-production-line-performance/rules>; the download is
   refused otherwise. The data may not be redistributed, so it is never part of this repository.
 - A Kaggle API token: Kaggle > Settings > API > create a new token, then either
-  `export KAGGLE_API_TOKEN=...` or save the downloaded `kaggle.json` to `~/.kaggle/kaggle.json`.
+  `export KAGGLE_API_TOKEN=...`, save the downloaded `kaggle.json` to `~/.kaggle/kaggle.json`, or
+  copy `.env.example` to `.env` (git-ignored), fill it in and run every command as
+  `uv run --env-file .env bosch-xai ...`.
 - About 15 GB of free disk space for the training CSVs and 16 GB of RAM or more (see
   [Resource use](#resource-use)).
 - Optional, for `explain --llm`: an Anthropic API key in `ANTHROPIC_API_KEY`.
