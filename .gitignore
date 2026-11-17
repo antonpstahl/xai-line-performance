@@ -221,3 +221,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project: data, models and generated tables are never committed
+data/
+models/
+reports/*.parquet
