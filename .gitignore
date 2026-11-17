@@ -226,3 +226,6 @@ __marimo__/
 data/
 models/
 reports/*.parquet
+# Per-part Ids and raw values: data, not aggregates, so never committed
+reports/local_explanations.md
+reports/slices.json

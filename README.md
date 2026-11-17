@@ -60,8 +60,8 @@ All commands work relative to the repository root. Outputs:
 | `models/model.txt` | final LightGBM model (git-ignored) |
 | `reports/metrics.json` | metrics, threshold, config and package versions |
 | `reports/top_features.png`, `reports/station_importance.png` | global importance |
-| `reports/local_explanations.md` | one true positive, false positive and false negative |
-| `reports/slices.json`, `reports/slices.md` | failure slices (with LLM text and check if `--llm`) |
+| `reports/local_explanations.md` | one true positive, false positive and false negative (git-ignored) |
+| `reports/slices.json`, `reports/slices.md` | failure slices, with LLM text and check if `--llm` (JSON git-ignored) |
 
 ## Results
 
@@ -178,6 +178,13 @@ src/bosch_xai/
 tests/        pytest on tiny synthetic data
 ```
 
-## License
+## Data use and license
 
-Code: MIT (see `LICENSE`). The data belongs to Bosch and Kaggle and follows the competition rules.
+The data belongs to Bosch and is used under the
+[Kaggle competition rules](https://www.kaggle.com/competitions/bosch-production-line-performance/rules).
+It is not redistributed: raw and processed data, models and every report that contains
+individual parts (`local_explanations.md`, `slices.json`) are git-ignored. Only aggregate
+results are committed: metrics, importance plots and slice summaries.
+
+Code: MIT (see `LICENSE`), which is also the license the competition rules attach to publicly
+shared code.
