@@ -87,6 +87,11 @@ applied unchanged to its holdout.
   precision on the sample; the difference is the tenfold failure rate there, not the model.
 - Sample metrics are therefore not comparable to the full data or to the competition
   leaderboard.
+- **LLM summaries (`explain --llm`, `claude-haiku-5-5`, full data):** all five pass the
+  faithfulness check and are in `reports/slices.md`. A first attempt, before the prompt defined
+  each field, also used only correct names and numbers, yet in three slices it described the
+  reference rate over all high-risk parts as that slice's baseline; the check cannot catch such
+  a wrong relation. It did flag the one number the model computed itself (a 30% ratio).
 
 ## Figures
 
